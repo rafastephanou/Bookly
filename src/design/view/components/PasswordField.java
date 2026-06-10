@@ -13,59 +13,43 @@ public class PasswordField extends JPasswordField {
 	private static final long serialVersionUID = 1L;
 	
     private String placeholder;
-    private boolean isPlaceholderVisible = true;
+    private boolean showingPlaceholder = true;
 
     public PasswordField (String placeholder) {
-    	
         this.placeholder = placeholder;
 
         setBackground(Constants.YELLOW); 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // setBorder(BorderFactory.createLineBorder(constants.BLACK, 1));
         setMaximumSize(new Dimension(Constants.DIMENSION_FIELD_WIDTH, Constants.DIMENSION_FIELD_HEIGHT));
         setPreferredSize(new Dimension(Constants.DIMENSION_FIELD_WIDTH, Constants.DIMENSION_FIELD_HEIGHT));
 
-        setText(this.placeholder);
+        setText(placeholder);
         setForeground(Color.GRAY);
 
         addFocusListener(new FocusListener() {
-        	
-        	@Override
+            @Override
             public void focusGained(FocusEvent e) {
-        		
-                if (isPlaceholderVisible) {
-                	
+                if (showingPlaceholder) {
                     setText("");
                     setForeground(Color.BLACK);
-                    isPlaceholderVisible = false;
-                    
+                    showingPlaceholder = false;
                 }
-                
             }
 
             @Override
             public void focusLost(FocusEvent e) {
-            	
                 if (getText().isEmpty()) {
-                	
                     setText(placeholder);
                     setForeground(Color.GRAY);
-                    isPlaceholderVisible = true;
-                    
+                    showingPlaceholder = true;
                 }
-                
             }
-            
         });
-        
     }
 
     @Override
     public String getText() {
-    	
-    	if (isPlaceholderVisible) return "";
-
-    	return super.getText();
-        
+        return showingPlaceholder ? "" : super.getText();
     }
-    
 }
