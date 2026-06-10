@@ -84,7 +84,7 @@ public class DatePollTest {
 		
 		newDatePoll.addDateOption(newDate);
 		
-		User newUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
+		User newUser = new User("Matheus", "Candiotto", "012345678-90", "usuario@exemplo.com", "SenhaMuitoSegura");
 		
 		assertEquals(0, newDatePoll.getVotes().size());
 		
@@ -94,7 +94,7 @@ public class DatePollTest {
 		newDatePoll.vote(newUser, 0);
 		assertEquals(1, newDatePoll.getVotes().size());
 		
-		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
+		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "usuario@exemplo.com", "SenhaMuitoSegura");
 		
 		newDatePoll.vote(newSecondUser, 0);
 		assertEquals(2, newDatePoll.getVotes().size());

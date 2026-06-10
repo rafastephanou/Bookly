@@ -14,7 +14,7 @@ public class CreatorTest {
 		
 		String name = "Matheus";
 		String surname = "Candiotto";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String cpf = "012345678-90";
 		String password = "SenhaMuitoSegura";
 		
@@ -37,7 +37,7 @@ public class CreatorTest {
 		String name = "Matheus";
 		String surname = "Candiotto";
 		String cpf = "012345678-90";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String password = "SenhaMuitoSegura";
 		
 		Creator newCreator = new Creator(name, surname, cpf, email, password);
@@ -56,7 +56,7 @@ public class CreatorTest {
 		String name = "Matheus";
 		String surname = "Candiotto";
 		String cpf = "012345678-90";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String password = "SenhaMuitoSegura";
 		
 		Creator newCreator = new Creator(name, surname, cpf, email, password);

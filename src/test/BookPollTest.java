@@ -85,7 +85,7 @@ public class BookPollTest {
 		
 		newBookPoll.addBookOption(newBook);
 		
-		User newUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
+		User newUser = new User("Matheus", "Candiotto", "012345678-90", "usuario@exemplo.com", "SenhaMuitoSegura");
 		
 		assertEquals(0, newBookPoll.getVotes().size());
 		
@@ -95,7 +95,7 @@ public class BookPollTest {
 		newBookPoll.vote(newUser, 0);
 		assertEquals(1, newBookPoll.getVotes().size());
 		
-		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
+		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "usuario@exemplo.com", "SenhaMuitoSegura");
 		
 		newBookPoll.vote(newSecondUser, 0);
 		assertEquals(2, newBookPoll.getVotes().size());

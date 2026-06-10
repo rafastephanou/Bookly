@@ -15,7 +15,7 @@ public class UserTest {
 		String name = "Matheus";
 		String surname = "Candiotto";
 		String cpf = "012345678-90";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String password = "SenhaMuitoSegura";
 		
 		User newUser = new User(name, surname, email, cpf, password);
@@ -36,7 +36,7 @@ public class UserTest {
 		String name = "Matheus";
 		String surname = "Candiotto";
 		String cpf = "012345678-90";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String password = "SenhaMuitoSegura";
 		
 		User newUser = new User(name, surname, cpf, email, password);
@@ -54,7 +54,7 @@ public class UserTest {
 		String name = "Matheus";
 		String surname = "Candiotto";
 		String cpf = "012345678-90";
-		String email = "matheus.candiotto@ufrgs.br";
+		String email = "usuario@exemplo.com";
 		String password = "SenhaMuitoSegura";
 		
 		User newUser = new User(name, surname, cpf, email, password);
