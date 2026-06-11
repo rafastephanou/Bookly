@@ -3,8 +3,8 @@ package com;
 import design.view.HomeScreen;
 import design.view.LoginScreen;
 import design.view.RegistrationScreen;
-import design.view.VerifyUserInfo;
 import design.view.ResetPasswordScreen;
+import design.view.ResetPasswordScreen1;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,104 +12,92 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
-import org.tinylog.Logger;
-
-import data.Constants;
-
 public class LoginController {
-	
     private LoginScreen loginScreen;
+    private com.service.UserService userService;
+
 
     public LoginController(LoginScreen loginScreen) {
-    	
         this.loginScreen = loginScreen;
-        
+        this.userService = new com.service.UserService(); // carrega usuários do CSV
         initController();
-        
     }
 
+
     private void initController() {
-    	
-        loginScreen.btnLogin.addActionListener(e -> handleLogin());
-        loginScreen.btnSignin.addActionListener(e -> handleRegister());
-        loginScreen.btnForgotPassword.addActionListener(e -> handleReset());
-        
+        loginScreen.btnEntrar.addActionListener(e -> handleLogin());
+        loginScreen.btnCadastrar.addActionListener(e -> handleRegister());
+        loginScreen.btnEsqueceuSenha.addActionListener(e -> handleReset());
     }
 
     private void handleLogin() {
-    	
-        String userInfo = loginScreen.txtUserInfo.getText();
-        String password = new String(loginScreen.txtPassword.getPassword());
+        String emailCpf = loginScreen.txtEmailCpf.getText();
+        String senha = new String(loginScreen.txtSenha.getPassword());
 
-        if (authenticateUser(userInfo, password)) Logger.info("Login realizado com sucesso");
-        else Logger.error("Credenciais de login inválidas");
-
+        if (authenticateUser(emailCpf, senha)) {
+            System.out.println("Login successful!");
+        } else {
+            System.out.println("Invalid credentials.");
+        }
     }
 
     private void handleRegister() {
-    	
-        RegistrationScreen regScreen = new RegistrationScreen();
-        
+        RegistrationScreen registrationScreen = new RegistrationScreen();
         loginScreen.dispose();
-        
-        regScreen.setVisible(true);
-        
-        AppSystem registerUser = new AppSystem(regScreen);
+
+        AppSystem app = new AppSystem(registrationScreen);
+        app.initRegistrationController();
+        registrationScreen.setVisible(true);
         
     }
 
     private void handleReset() {
-    	
-        VerifyUserInfo resetScreen = new VerifyUserInfo();
-        ResetPasswordScreen resetScreen1 = new ResetPasswordScreen();
-        
+        ResetPasswordScreen resetScreen = new ResetPasswordScreen();
+        ResetPasswordScreen1 resetScreen1 = new ResetPasswordScreen1();
         loginScreen.dispose();
-        
-        resetScreen.setVisible(true);
-        
         ResetPasswordController resetController = new ResetPasswordController(resetScreen, resetScreen1);
-        
+        resetScreen.setVisible(true);
     }
 
-    private boolean authenticateUser(String userInfo, String password) {
+    private boolean authenticateUser(String emailCpf, String senhaDigitada) {
+    try (BufferedReader br = new BufferedReader(new FileReader("src/data/files/Users.csv"))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] data = line.split(",");
+            if (data.length < 6) continue;
 
-    	try (BufferedReader buffer = new BufferedReader(new FileReader(Constants.USERS_PATH))) {
+            String email = data[3].trim();
+            String cpf   = data[4].trim();
+            String senha = data[5].trim();
 
-    		String line;
-        
-    		while ((line = buffer.readLine()) != null) {
+            if ((emailCpf.equals(email) || emailCpf.equals(cpf)) &&
+                senhaDigitada.equals(senha)) {
 
-    			String[] data = line.split(",");
-
-    			if (data.length < Constants.USERS_ENTRIES_PER_LINE) continue;
-
-    			String email = data[2].trim();
-    			String cpf = data[3].trim();
-    			String senha = data[4].trim();
-
-    			if ((userInfo.equals(email) || userInfo.equals(cpf)) && password.equals(senha)) {
-
-    				loginScreen.dispose();
                 
-                	HomeScreen homeScreen = new HomeScreen();
-                	homeScreen.setVisible(true);
-                
-                	return true;
-                
-    			}
-    			
-    		}
+                com.model.User loggedUser = userService.findUserByEmail(email);
+                if (loggedUser == null) {
+                    
+                    userService.reloadUsers();
+                    loggedUser = userService.findUserByEmail(email);
+                }
 
-    	} catch (IOException e) {
-    	
-    		Logger.error("Erro ao ler o arquivo de usuários");
-    	
-    	}
+                loginScreen.dispose();
 
-    	JOptionPane.showMessageDialog(loginScreen, "Credenciais inválidas");
-    	
-    	return false;
-    
+                HomeScreen homeScreen = new HomeScreen();
+                com.service.BookClubService clubService = new com.service.BookClubService(userService);
+                new HomeController(homeScreen, loggedUser, clubService);
+                homeScreen.setVisible(true);
+                return true;
+            }
+        }
+    } catch (IOException e) {
+        System.out.println("Error at reading users: " + e.getMessage());
     }
 
+    JOptionPane.showMessageDialog(loginScreen, "Invalid credentials.");
+    return false;
 }
+}
+
+
+

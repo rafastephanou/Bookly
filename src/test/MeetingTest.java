@@ -6,69 +6,57 @@ import java.util.Date;
 
 import org.junit.jupiter.api.Test;
 
-import com.Creator;
-import com.AppSystem;
-import com.Meeting;
+import com.model.BookClub;
+import com.model.Meeting;
+import com.model.User;
 
 public class MeetingTest {
 
-	@Test
-	public void testConstructor() {
-		
-		Creator newCreator = new Creator("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		String type = "Presencial";
-		Date date = new Date();
-		String location = "Av. Bento Gonçalves, 9500 - Agronomia, Porto Alegre - RS, 91509-900";
-		
-		Meeting newMeeting = new Meeting(newCreator, type, date, location);
-		
-		assertEquals(Meeting.getNumMeetingsCreated(), newMeeting.getId());
-		assertEquals(newCreator, newMeeting.getCreator());
-		assertEquals(0, newMeeting.getParticipants().size());
-		assertEquals(type, newMeeting.getType());
-		assertEquals(date, newMeeting.getDate());
-		assertEquals(location, newMeeting.getLocation());
-		
-	}
-	
-	@Test
-	public void testCreateMeeting() {
-		
-		Creator newCreator = new Creator("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		String type = "Presencial";
-		Date date = new Date();
-		String location = "Av. Bento Gonçalves, 9500 - Agronomia, Porto Alegre - RS, 91509-900";
-		
-		Meeting newMeeting = new Meeting(newCreator, type, date, location);
-		
-		AppSystem appSystem = new AppSystem();
-		
-		appSystem.createMeeting(newMeeting);
-		
-		assertEquals(1, appSystem.getMeetings().size());
-		
-	}
-	
-	@Test
-	public void testDeleteMeeting() {
-		
-		Creator newCreator = new Creator("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		String type = "Presencial";
-		Date date = new Date();
-		String location = "Av. Bento Gonçalves, 9500 - Agronomia, Porto Alegre - RS, 91509-900";
-		
-		Meeting newMeeting = new Meeting(newCreator, type, date, location);
-		
-		AppSystem appSystem = new AppSystem();
-		
-		appSystem.createMeeting(newMeeting);
-		appSystem.deleteMeeting(newMeeting);
-		
-		assertEquals(0, appSystem.getMeetings().size());
-		
+	private BookClub newClub(User creator) {
+		return new BookClub(70, creator, "Clube de Encontros");
 	}
 
+	@Test
+	public void testConstructor() {
+		User creator = new User(40, "Theo", "Reis", "theo@exemplo.com", "111", "pwd");
+		BookClub club = newClub(creator);
+		Date date = new Date();
+
+		Meeting meeting = new Meeting(0, club, "Presencial", date, "Biblioteca Central");
+
+		assertEquals(1, meeting.getId());
+		assertEquals("Presencial", meeting.getType());
+		assertEquals(date, meeting.getDate());
+		assertEquals("Biblioteca Central", meeting.getLocation());
+		assertSame(club, meeting.getBookClub());
+	}
+
+	@Test
+	public void testCreatorComesFromBookClub() {
+		User creator = new User(41, "Vera", "Pinto", "vera@exemplo.com", "222", "pwd");
+		BookClub club = newClub(creator);
+
+		Meeting meeting = new Meeting(0, club, "Online", new Date(), "Google Meet");
+
+		assertSame(creator, meeting.getCreator());
+		assertSame(club.getCreator(), meeting.getCreator());
+	}
+
+	@Test
+	public void testNewMeetingHasNoParticipants() {
+		User creator = new User(42, "Iris", "Gomes", "iris@exemplo.com", "333", "pwd");
+		Meeting meeting = new Meeting(0, newClub(creator), "Presencial", new Date(), "Cafe");
+
+		assertNotNull(meeting.getParticipants());
+		assertTrue(meeting.getParticipants().isEmpty());
+	}
+
+	@Test
+	public void testIdDerivesFromConstructorArgument() {
+		User creator = new User(43, "Noa", "Dias", "noa@exemplo.com", "444", "pwd");
+		Meeting meeting = new Meeting(4, newClub(creator), "Online", new Date(), "Zoom");
+
+		// id = argumento + 1
+		assertEquals(5, meeting.getId());
+	}
 }

@@ -2,103 +2,62 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import com.DatePoll;
-import com.User;
-import com.AppSystem;
+import com.model.BookClub;
+import com.model.DatePoll;
+import com.model.User;
 
 public class DatePollTest {
 
-	@Test
-	public void testConstructor() {
-		
-		Date closingDate = new Date();
-		DatePoll newDatePoll = new DatePoll(closingDate);
-		
-		assertEquals(DatePoll.getNumPollsCreated(), newDatePoll.getId());
-		assertNotNull(newDatePoll.getOpeningDate());
-		assertEquals(closingDate, newDatePoll.getClosingDate());
-		assertTrue(newDatePoll.getStatus());
-		assertEquals(0, newDatePoll.getVotes().size());
-		assertEquals(0, newDatePoll.getVoters().size());
-		assertEquals(0, newDatePoll.getOptions().size());
-		
-	}
-	
-	@Test
-	public void testCreateDatePoll() {
-		
-		DatePoll newDatePoll = new DatePoll(new Date());
-		
-		AppSystem appSystem = new AppSystem();		
-		appSystem.createPoll(newDatePoll);
-		
-		assertEquals(1, appSystem.getPolls().size());
-		
-	}
-	
-	@Test
-	public void testDeleteDatePoll() {
-		
-		DatePoll newDatePoll = new DatePoll(new Date());
-		
-		AppSystem appSystem = new AppSystem();
-		
-		appSystem.createPoll(newDatePoll);
-		appSystem.deletePoll(newDatePoll);
-		
-		assertEquals(0, appSystem.getPolls().size());
-		
-	}
-	
-	@Test
-	public void testAddDateOption() {
-		
-		DatePoll newDatePoll = new DatePoll(new Date());
-		
-		Date newDate = new Date();
-		
-		assertEquals(0, newDatePoll.getOptions().size());
-		
-		newDatePoll.addDateOption(newDate);
-		
-		assertEquals(1, newDatePoll.getOptions().size());
-		
-		Date newSecondDateOption = new Date();
-		
-		newDatePoll.addDateOption(newSecondDateOption);
-		
-		assertEquals(2, newDatePoll.getOptions().size());
-		
-	}
-	
-	@Test
-	public void testVoteDatePoll() {
-		
-		DatePoll newDatePoll = new DatePoll(new Date());
-		
-		Date newDate = new Date();
-		
-		newDatePoll.addDateOption(newDate);
-		
-		User newUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		assertEquals(0, newDatePoll.getVotes().size());
-		
-		newDatePoll.vote(newUser, 0);
-		assertEquals(1, newDatePoll.getVotes().size());
-		
-		newDatePoll.vote(newUser, 0);
-		assertEquals(1, newDatePoll.getVotes().size());
-		
-		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		newDatePoll.vote(newSecondUser, 0);
-		assertEquals(2, newDatePoll.getVotes().size());
-		
+	private DatePoll newPoll(String... options) {
+		User creator = new User(30, "Sara", "Nunes", "sara@exemplo.com", "222", "pwd");
+		BookClub club = new BookClub(60, creator, "Clube de Datas");
+		ArrayList<String> opts = new ArrayList<>(Arrays.asList(options));
+		return new DatePoll(300, club, "Qual data?", opts, new int[opts.size()]);
 	}
 
+	@Test
+	public void testInitialVotesAreZero() {
+		DatePoll poll = newPoll("12/06", "13/06");
+
+		assertArrayEquals(new int[] {0, 0}, poll.getVotes());
+		assertEquals("0,0", poll.getVotesAsCSV());
+	}
+
+	@Test
+	public void testRegisterVoteIncrementsOption() {
+		DatePoll poll = newPoll("12/06", "13/06", "14/06");
+
+		poll.registerVote(0);
+		poll.registerVote(2);
+		poll.registerVote(2);
+
+		assertArrayEquals(new int[] {1, 0, 2}, poll.getVotes());
+	}
+
+	@Test
+	public void testRegisterVoteOutOfRangeIsIgnored() {
+		DatePoll poll = newPoll("12/06", "13/06");
+
+		poll.registerVote(99);
+
+		assertArrayEquals(new int[] {0, 0}, poll.getVotes());
+	}
+
+	@Test
+	public void testTypeIsDate() {
+		assertEquals("DATE", newPoll("12/06", "13/06").getType());
+	}
+
+	@Test
+	public void testQuestionAndOptions() {
+		DatePoll poll = newPoll("12/06", "13/06");
+
+		assertEquals("Qual data?", poll.getQuestion());
+		assertEquals(2, poll.getOptions().size());
+	}
 }

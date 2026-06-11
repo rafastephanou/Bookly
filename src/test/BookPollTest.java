@@ -2,104 +2,79 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import com.AppSystem;
-import com.Book;
-import com.BookPoll;
-import com.User;
+import com.model.BookClub;
+import com.model.BookPoll;
+import com.model.User;
 
 public class BookPollTest {
 
-	@Test
-	public void testConstructor() {
-		
-		Date closingDate = new Date();
-		BookPoll newBookPoll = new BookPoll(closingDate);
-		
-		assertEquals(BookPoll.getNumPollsCreated(), newBookPoll.getId());
-		assertNotNull(newBookPoll.getOpeningDate());
-		assertEquals(closingDate, newBookPoll.getClosingDate());
-		assertTrue(newBookPoll.getStatus());
-		assertEquals(0, newBookPoll.getVotes().size());
-		assertEquals(0, newBookPoll.getVoters().size());
-		assertEquals(0, newBookPoll.getOptions().size());
-		
-	}
-	
-	@Test
-	public void testCreateBookPoll() {
-		
-		BookPoll newBookPoll = new BookPoll(new Date());
-		
-		AppSystem appSystem = new AppSystem();		
-		appSystem.createPoll(newBookPoll);
-		
-		assertEquals(1, appSystem.getPolls().size());
-		
-	}
-	
-	@Test
-	public void testDeleteBookPoll() {
-		
-		BookPoll newBookPoll = new BookPoll(new Date());
-		
-		AppSystem appSystem = new AppSystem();
-		
-		appSystem.createPoll(newBookPoll);
-		appSystem.deletePoll(newBookPoll);
-		
-		assertEquals(0, appSystem.getPolls().size());
-		
-	}
-	
-	@Test
-	public void testAddBookOption() {
-
-		BookPoll newBookPoll = new BookPoll(new Date());
-		
-		Book newBook = new Book("Admirável Mundo Novo", "Aldous Huxley", "9788-2505-0090", 2014, 312, "Ficção científica");
-		
-		assertEquals(0, newBookPoll.getOptions().size());
-		
-		newBookPoll.addBookOption(newBook);
-		
-		assertEquals(1, newBookPoll.getOptions().size());
-		
-		Book newSecondBook = new Book("Admirável Mundo Novo", "Aldous Huxley", "9788-2505-0090", 2014, 312, "Ficção científica");
-		
-		newBookPoll.addBookOption(newSecondBook);
-		
-		assertEquals(2, newBookPoll.getOptions().size());
-		
-	}
-	
-	@Test
-	public void testVoteBookPoll() {
-		
-		BookPoll newBookPoll = new BookPoll(new Date());
-		
-		Book newBook = new Book("Admirável Mundo Novo", "Aldous Huxley", "9788-2505-0090", 2014, 312, "Ficção científica");
-		
-		newBookPoll.addBookOption(newBook);
-		
-		User newUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		assertEquals(0, newBookPoll.getVotes().size());
-		
-		newBookPoll.vote(newUser, 0);
-		assertEquals(1, newBookPoll.getVotes().size());
-		
-		newBookPoll.vote(newUser, 0);
-		assertEquals(1, newBookPoll.getVotes().size());
-		
-		User newSecondUser = new User("Matheus", "Candiotto", "012345678-90", "matheus.candiotto@ufrgs.br", "SenhaMuitoSegura");
-		
-		newBookPoll.vote(newSecondUser, 0);
-		assertEquals(2, newBookPoll.getVotes().size());
-		
+	private BookClub newClub() {
+		User creator = new User(20, "Rui", "Alves", "rui@exemplo.com", "111", "pwd");
+		return new BookClub(50, creator, "Clube de Teste");
 	}
 
+	private BookPoll newPoll(String... options) {
+		ArrayList<String> opts = new ArrayList<>(Arrays.asList(options));
+		return new BookPoll(200, newClub(), "Qual livro vamos ler?", opts, new int[opts.size()]);
+	}
+
+	@Test
+	public void testInitialVotesAreZero() {
+		BookPoll poll = newPoll("Livro A", "Livro B", "Livro C");
+
+		assertArrayEquals(new int[] {0, 0, 0}, poll.getVotes());
+		assertEquals("0,0,0", poll.getVotesAsCSV());
+	}
+
+	@Test
+	public void testOptionsArePreserved() {
+		BookPoll poll = newPoll("Livro A", "Livro B");
+
+		assertEquals(2, poll.getOptions().size());
+		assertEquals("Livro A", poll.getOptions().get(0));
+		assertEquals("Livro B", poll.getOptions().get(1));
+		assertEquals("Qual livro vamos ler?", poll.getQuestion());
+	}
+
+	@Test
+	public void testRegisterVoteIncrementsOption() {
+		BookPoll poll = newPoll("Livro A", "Livro B", "Livro C");
+
+		poll.registerVote(1);
+		poll.registerVote(1);
+		poll.registerVote(2);
+
+		assertArrayEquals(new int[] {0, 2, 1}, poll.getVotes());
+		assertEquals("0,2,1", poll.getVotesAsCSV());
+	}
+
+	@Test
+	public void testRegisterVoteOutOfRangeIsIgnored() {
+		BookPoll poll = newPoll("Livro A", "Livro B");
+
+		poll.registerVote(-1);
+		poll.registerVote(5);
+
+		assertArrayEquals(new int[] {0, 0}, poll.getVotes());
+	}
+
+	@Test
+	public void testTypeIsBook() {
+		assertEquals("BOOK", newPoll("A", "B").getType());
+	}
+
+	@Test
+	public void testBookClubBackReference() {
+		BookClub club = newClub();
+		ArrayList<String> opts = new ArrayList<>(Arrays.asList("A", "B"));
+		BookPoll poll = new BookPoll(201, club, "Pergunta", opts, new int[opts.size()]);
+
+		assertSame(club, poll.getBookClub());
+		assertEquals(201, poll.getId());
+	}
 }
